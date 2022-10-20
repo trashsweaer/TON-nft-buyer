@@ -1,0 +1,422 @@
+"Asm.fif" include
+// automatically generated from `/home/user/.config/toncli/func-libs/error_codes.func` `/home/user/.config/toncli/func-libs/stdlib.func` `/home/user/.config/toncli/func-libs/math.func` `/home/user/bb_contract/func/code.func` incl:`/home/user/bb_contract/func/utils/helpers.func` incl:`/home/user/bb_contract/func/utils/params.func` incl:`/home/user/bb_contract/func/utils/op-codes.func` 
+PROGRAM{
+  DECLPROC power
+  DECLPROC sqrt
+  DECLPROC avg
+  DECLPROC exp
+  DECLPROC log2
+  DECLPROC force_chain
+  DECLPROC set_up_fees
+  DECLPROC load_all_fees
+  104128 DECLMETHOD balance
+  DECLPROC set_up_state
+  DECLPROC load_cur_state
+  DECLPROC send_money
+  DECLPROC send_msg
+  DECLPROC transfer_ownership
+  DECLPROC recv_internal
+  DECLPROC recv_external
+  power PROCREF:<{
+    //  x exponent
+    OVER	//  x exponent x
+    0 EQINT	//  x exponent _3
+    IFJMP:<{	//  x exponent
+      2DROP	// 
+      0 PUSHINT	//  _4=0
+    }>	//  x exponent
+    DUP	//  x exponent exponent
+    0 EQINT	//  x exponent _6
+    IFJMP:<{	//  x exponent
+      2DROP	// 
+      1 PUSHINT	//  _7=1
+    }>	//  x exponent
+    OVER	//  x counter result
+    WHILE:<{
+      OVER	//  x counter result counter
+      1 GTINT	//  x counter result _11
+    }>DO<{	//  x counter result
+      s2 PUSH	//  x counter result x
+      MUL	//  x counter result
+      SWAP	//  x result counter
+      DEC	//  x result counter
+      SWAP	//  x counter result
+    }>	//  x counter result
+    2 1 BLKDROP2	//  result
+  }>
+  sqrt PROCREF:<{
+    //  x
+    DUP	//  x x
+    0 EQINT	//  x _2
+    IFJMP:<{	//  x
+      DROP	// 
+      0 PUSHINT	//  _3=0
+    }>	//  x
+    DUP	//  x x
+    4 LESSINT	//  x _5
+    IFJMP:<{	//  x
+      DROP	// 
+      1 PUSHINT	//  _6=1
+    }>	//  x
+    DUP	//  x x
+    INC	//  x _9
+    1 RSHIFT#	//  x z
+    OVER	//  x z y
+    WHILE:<{
+      2DUP	//  x z y z y
+      LESS	//  x z y _13
+    }>DO<{	//  x z y
+      DROP	//  x z
+      s0 s1 s0 PUSH3	//  x z y x z
+      DIV	//  x z y _14
+      ROT	//  x y _14 z
+      ADD	//  x y _15
+      1 RSHIFT#	//  x y z
+      SWAP	//  x z y
+    }>	//  x z y
+    2 1 BLKDROP2	//  y
+  }>
+  avg PROCREF:<{
+    //  x y
+    ADD	//  _2
+    1 RSHIFT#	//  _4
+  }>
+  exp PROCREF:<{
+    //  x
+    DUP	//  x x
+    -1 GTINT	//  x _2
+    IF:<{	//  x
+      POW2	//  _3
+    }>ELSE<{	//  x
+      1 PUSHINT	//  x _6=1
+      SWAP	//  _6=1 x
+      NEGATE	//  _6=1 _8
+      RSHIFT	//  _3
+    }>
+  }>
+  log2 PROCREF:<{
+    //  x
+    0 PUSHINT	//  x n=0
+    7 PUSHPOW2	//  x n=0 _3=128
+    exp INLINECALLDICT	//  x n=0 _4
+    s2 s(-1) PUXC	//  x n=0 x _4
+    GEQ	//  x n=0 _5
+    IF:<{	//  x n=0
+      DROP	//  x
+      128 RSHIFT#	//  x
+      7 PUSHPOW2	//  x n
+    }>	//  x n
+    64 PUSHINT	//  x n _10=64
+    exp INLINECALLDICT	//  x n _11
+    s2 s(-1) PUXC	//  x n x _11
+    GEQ	//  x n _12
+    IF:<{	//  x n
+      SWAP	//  n x
+      64 RSHIFT#	//  n x
+      SWAP	//  x n
+      64 ADDCONST	//  x n
+    }>	//  x n
+    32 PUSHINT	//  x n _17=32
+    exp INLINECALLDICT	//  x n _18
+    s2 s(-1) PUXC	//  x n x _18
+    GEQ	//  x n _19
+    IF:<{	//  x n
+      SWAP	//  n x
+      32 RSHIFT#	//  n x
+      SWAP	//  x n
+      32 ADDCONST	//  x n
+    }>	//  x n
+    16 PUSHINT	//  x n _24=16
+    exp INLINECALLDICT	//  x n _25
+    s2 s(-1) PUXC	//  x n x _25
+    GEQ	//  x n _26
+    IF:<{	//  x n
+      SWAP	//  n x
+      16 RSHIFT#	//  n x
+      SWAP	//  x n
+      16 ADDCONST	//  x n
+    }>	//  x n
+    8 PUSHINT	//  x n _31=8
+    exp INLINECALLDICT	//  x n _32
+    s2 s(-1) PUXC	//  x n x _32
+    GEQ	//  x n _33
+    IF:<{	//  x n
+      SWAP	//  n x
+      8 RSHIFT#	//  n x
+      SWAP	//  x n
+      8 ADDCONST	//  x n
+    }>	//  x n
+    4 PUSHINT	//  x n _38=4
+    exp INLINECALLDICT	//  x n _39
+    s2 s(-1) PUXC	//  x n x _39
+    GEQ	//  x n _40
+    IF:<{	//  x n
+      SWAP	//  n x
+      4 RSHIFT#	//  n x
+      SWAP	//  x n
+      4 ADDCONST	//  x n
+    }>	//  x n
+    2 PUSHINT	//  x n _45=2
+    exp INLINECALLDICT	//  x n _46
+    s2 s(-1) PUXC	//  x n x _46
+    GEQ	//  x n _47
+    IF:<{	//  x n
+      SWAP	//  n x
+      2 RSHIFT#	//  n x
+      SWAP	//  x n
+      2 ADDCONST	//  x n
+    }>	//  x n
+    1 PUSHINT	//  x n _52=1
+    exp INLINECALLDICT	//  x n _53
+    s1 s2 XCHG	//  n x _53
+    GEQ	//  n _54
+    IF:<{	//  n
+      INC	//  n
+    }>	//  n
+  }>
+  force_chain PROC:<{
+    //  addr
+    REWRITESTDADDR	//  _8 _9
+    DROP	//  wc
+    0 EQINT	//  _6
+    333 THROWIFNOT
+  }>
+  set_up_fees PROCREF:<{
+    //  fee
+    NEWC	//  fee _1
+    SWAP	//  _1 fee
+    STVARUINT16	//  _2
+    ENDC	//  _3
+  }>
+  load_all_fees PROCINLINE:<{
+    // 
+    c4 PUSH	//  _1
+    CTOS	//  ds
+    LDVARUINT16	//  _6 _5
+    DROP	//  _3
+  }>
+  balance PROCREF:<{
+    // 
+    BALANCE	//  _0
+    FIRST	//  _1
+  }>
+  set_up_state PROCREF:<{
+    //  state
+    NEWC	//  state _1
+    8 STU	//  _3
+    ENDC	//  _4
+    c4 POP
+  }>
+  load_cur_state PROCINLINE:<{
+    // 
+    c4 PUSH	//  _1
+    CTOS	//  ds
+    8 LDU	//  _7 _6
+    DROP	//  _3
+  }>
+  send_money PROCINLINE:<{
+    //  mode to_addr amount op query_id
+    0 PUSHINT	//  mode to_addr amount op query_id _6=0
+    24 PUSHINT	//  mode to_addr amount op query_id _6=0 _7=24
+    NEWC	//  mode to_addr amount op query_id _6=0 _7=24 _8
+    6 STU	//  mode to_addr amount op query_id _6=0 _10
+    s0 s5 XCHG2	//  mode _6=0 amount op query_id _10 to_addr
+    STSLICER	//  mode _6=0 amount op query_id _11
+    s0 s3 XCHG2	//  mode _6=0 query_id op _11 amount
+    STVARUINT16	//  mode _6=0 query_id op _12
+    s1 s3 XCHG	//  mode op query_id _6=0 _12
+    107 STU	//  mode op query_id _26
+    s1 s2 XCHG	//  mode query_id op _26
+    32 STU	//  mode query_id _28
+    64 STU	//  mode msg
+    ENDC	//  mode _31
+    SWAP	//  _31 mode
+    SENDRAWMSG
+  }>
+  send_msg PROCINLINE:<{
+    //  to_address amount op query_id payload send_mode
+    0 PUSHINT	//  to_address amount op query_id payload send_mode _7=0
+    16 PUSHINT	//  to_address amount op query_id payload send_mode _7=0 _8=16
+    NEWC	//  to_address amount op query_id payload send_mode _7=0 _8=16 _9
+    6 STU	//  to_address amount op query_id payload send_mode _7=0 _11
+    s0 s7 XCHG2	//  _7=0 amount op query_id payload send_mode _11 to_address
+    STSLICER	//  _7=0 amount op query_id payload send_mode _12
+    s0 s5 XCHG2	//  _7=0 send_mode op query_id payload _12 amount
+    STVARUINT16	//  _7=0 send_mode op query_id payload _13
+    s1 s5 XCHG	//  payload send_mode op query_id _7=0 _13
+    107 STU	//  payload send_mode op query_id _27
+    s1 s2 XCHG	//  payload send_mode query_id op _27
+    32 STU	//  payload send_mode query_id _29
+    64 STU	//  payload send_mode msg
+    s2 PUSH	//  payload send_mode msg payload
+    ISNULL	//  payload send_mode msg _32
+    NOT	//  payload send_mode msg _33
+    IF:<{	//  payload send_mode msg
+      ROT	//  send_mode msg payload
+      STBR	//  send_mode msg
+      SWAP	//  msg send_mode
+    }>ELSE<{
+      s2 POP	//  msg send_mode
+    }>
+    SWAP	//  send_mode msg
+    ENDC	//  send_mode _35
+    SWAP	//  _35 send_mode
+    SENDRAWMSG
+  }>
+  transfer_ownership PROCINLINE:<{
+    //  my_balance sender_address query_id in_msg_body fwd_fees
+    s3 POP
+    s3 POP	//  in_msg_body fwd_fees query_id
+    s0 s2 XCHG	//  query_id fwd_fees in_msg_body
+    LDMSGADDR	//  query_id fwd_fees new_owner_address in_msg_body
+    OVER	//  query_id fwd_fees new_owner_address in_msg_body new_owner_address
+    force_chain CALLDICT
+    LDMSGADDR	//  query_id fwd_fees new_owner_address response_destination in_msg_body
+    1 LDI	//  query_id fwd_fees new_owner_address response_destination _51 _50
+    NIP	//  query_id fwd_fees new_owner_address response_destination in_msg_body
+    LDVARUINT16	//  query_id fwd_fees new_owner_address response_destination forward_amount in_msg_body
+    BALANCE	//  query_id fwd_fees new_owner_address response_destination forward_amount in_msg_body _19
+    FIRST	//  query_id fwd_fees new_owner_address response_destination forward_amount in_msg_body balance
+    50000000 PUSHINT	//  query_id fwd_fees new_owner_address response_destination forward_amount in_msg_body balance _22=50000000
+    SUB	//  query_id fwd_fees new_owner_address response_destination forward_amount in_msg_body rest_amount
+    s2 PUSH	//  query_id fwd_fees new_owner_address response_destination forward_amount in_msg_body rest_amount forward_amount
+    IF:<{	//  query_id fwd_fees new_owner_address response_destination forward_amount in_msg_body rest_amount
+      s2 s5 PUSH2	//  query_id fwd_fees new_owner_address response_destination forward_amount in_msg_body rest_amount forward_amount fwd_fees
+      ADD	//  query_id fwd_fees new_owner_address response_destination forward_amount in_msg_body rest_amount _24
+      SUB	//  query_id fwd_fees new_owner_address response_destination forward_amount in_msg_body rest_amount
+    }>	//  query_id fwd_fees new_owner_address response_destination forward_amount in_msg_body rest_amount
+    s3 PUSH	//  query_id fwd_fees new_owner_address response_destination forward_amount in_msg_body rest_amount response_destination
+    2 PLDU	//  query_id fwd_fees new_owner_address response_destination forward_amount in_msg_body rest_amount _28
+    0 NEQINT	//  query_id fwd_fees new_owner_address response_destination forward_amount in_msg_body rest_amount need_response
+    DUP	//  query_id fwd_fees new_owner_address response_destination forward_amount in_msg_body rest_amount need_response need_response
+    IF:<{	//  query_id fwd_fees new_owner_address response_destination forward_amount in_msg_body rest_amount need_response
+      s0 s6 XCHG	//  query_id need_response new_owner_address response_destination forward_amount in_msg_body rest_amount fwd_fees
+      SUB	//  query_id need_response new_owner_address response_destination forward_amount in_msg_body rest_amount
+    }>ELSE<{
+      s6 POP	//  query_id need_response new_owner_address response_destination forward_amount in_msg_body rest_amount
+    }>
+    DUP	//  query_id need_response new_owner_address response_destination forward_amount in_msg_body rest_amount rest_amount
+    -1 GTINT	//  query_id need_response new_owner_address response_destination forward_amount in_msg_body rest_amount _34
+    402 THROWIFNOT
+    s2 PUSH	//  query_id need_response new_owner_address response_destination forward_amount in_msg_body rest_amount forward_amount
+    IF:<{	//  query_id need_response new_owner_address response_destination forward_amount in_msg_body rest_amount
+      85167505 PUSHINT	//  query_id need_response new_owner_address response_destination forward_amount in_msg_body rest_amount _36=85167505
+      NEWC	//  query_id need_response new_owner_address response_destination forward_amount in_msg_body rest_amount _36=85167505 _37
+      s0 s3 XCHG2	//  query_id need_response new_owner_address response_destination forward_amount _36=85167505 rest_amount _37 in_msg_body
+      STSLICER	//  query_id need_response new_owner_address response_destination forward_amount _36=85167505 rest_amount _38
+      s1 s5 XCHG
+      s3 s3 s0 XCHG3
+      s7 s(-1) PUXC
+      1 PUSHINT	//  query_id need_response rest_amount response_destination new_owner_address forward_amount _36=85167505 query_id _38 _39=1
+      send_msg INLINECALLDICT
+    }>ELSE<{
+      s4 POP
+      2DROP	//  query_id need_response rest_amount response_destination
+    }>
+    s0 s2 XCHG	//  query_id response_destination rest_amount need_response
+    IF:<{	//  query_id response_destination rest_amount
+      OVER	//  query_id response_destination rest_amount response_destination
+      force_chain CALLDICT
+      s1 s2 XCHG
+      3576854235 PUSHINT
+      ROT
+      PUSHNULL
+      1 PUSHINT	//  response_destination rest_amount _42=3576854235 query_id _43 _44=1
+      send_msg INLINECALLDICT
+    }>ELSE<{
+      3 BLKDROP	// 
+    }>
+  }>
+  recv_internal PROC:<{
+    SAMEALTSAVE	//  my_balance msg_value in_msg_full in_msg_body
+    2 2 BLKDROP2	//  in_msg_full in_msg_body
+    BALANCE	//  in_msg_full in_msg_body _5
+    FIRST	//  in_msg_full in_msg_body balance
+    OVER	//  in_msg_full in_msg_body balance in_msg_body
+    SEMPTY	//  in_msg_full in_msg_body balance _7
+    IFJMP:<{	//  in_msg_full in_msg_body balance
+      3 BLKDROP	// 
+    }>	//  in_msg_full in_msg_body balance
+    s0 s2 XCHG	//  balance in_msg_body in_msg_full
+    CTOS	//  balance in_msg_body cs
+    4 LDU	//  balance in_msg_body fl cs
+    SWAP
+    1 PUSHINT	//  balance in_msg_body cs fl _14=1
+    AND	//  balance in_msg_body cs _15
+    IFJMP:<{	//  balance in_msg_body cs
+      3 BLKDROP	// 
+    }>	//  balance in_msg_body cs
+    SWAP	//  balance cs in_msg_body
+    32 LDU	//  balance cs op in_msg_body
+    64 LDU	//  balance cs op query_id in_msg_body
+    load_all_fees INLINECALLDICT	//  balance cs op query_id in_msg_body fee
+    load_cur_state INLINECALLDICT	//  balance cs op query_id in_msg_body fee cur_state
+    s0 s2 XCHG	//  balance cs op query_id cur_state fee in_msg_body
+    LDVARUINT16	//  balance cs op query_id cur_state fee amount in_msg_body
+    s3 PUSH	//  balance cs op query_id cur_state fee amount in_msg_body cur_state
+    1 EQINT	//  balance cs op query_id cur_state fee amount in_msg_body _32
+    IF:<{	//  balance cs op query_id cur_state fee amount in_msg_body
+      s3 POP
+      s5 POP	//  balance amount op query_id in_msg_body fee
+      s3 PUSH	//  balance amount op query_id in_msg_body fee op
+      1 EQINT	//  balance amount op query_id in_msg_body fee _34
+      IFJMP:<{	//  balance amount op query_id in_msg_body fee
+        SWAP	//  balance amount op query_id fee in_msg_body
+        LDDICT	//  balance amount op query_id fee _74 _73
+        DROP	//  balance amount op query_id fee dict
+        UNTIL:<{
+          64 PUSHINT	//  balance amount op query_id fee dict _42=64
+          DICTUREMMIN
+          NULLSWAPIFNOT2	//  balance amount op query_id fee _78 _80 _79 _81
+          NIP	//  balance amount op query_id fee dict data f?
+          DUP	//  balance amount op query_id fee dict data f? f?
+          IF:<{	//  balance amount op query_id fee dict data f?
+            s6 s3 PUSH2	//  balance amount op query_id fee dict data f? amount fee
+            ADD	//  balance amount op query_id fee dict data f? _45
+            s8 s(-1) PUXC	//  balance amount op query_id fee dict data f? balance _45
+            GEQ	//  balance amount op query_id fee dict data f? _46
+            118 THROWIFNOT
+            64 PUSHINT	//  balance amount op query_id fee dict data f? _48=64
+            s0 s2 XCHG	//  balance amount op query_id fee dict _48=64 f? data
+            LDMSGADDR	//  balance amount op query_id fee dict _48=64 f? _49 data
+            LDVARUINT16	//  balance amount op query_id fee dict _48=64 f? _49 _85 _84
+            DROP	//  balance amount op query_id fee dict _48=64 f? _49 _51
+            s7 s6 PUSH2
+            s4 s5 XCHG	//  balance amount op query_id fee dict f? _48=64 _49 _51 op query_id
+            send_money INLINECALLDICT
+          }>ELSE<{
+            NIP	//  balance amount op query_id fee dict f?
+          }>
+          NOT	//  balance amount op query_id fee dict _54
+        }>	//  balance amount op query_id fee dict
+        6 BLKDROP	// 
+        RETALT
+      }>	//  balance amount op query_id in_msg_body fee
+      6 BLKDROP	// 
+    }>ELSE<{	//  balance cs op query_id cur_state fee amount in_msg_body
+      NIP	//  balance cs op query_id cur_state fee in_msg_body
+      s0 s2 XCHG	//  balance cs op query_id in_msg_body fee cur_state
+      2 EQINT	//  balance cs op query_id in_msg_body fee _57
+      IF:<{	//  balance cs op query_id in_msg_body fee
+        s0 s3 XCHG
+        1607220500 PUSHINT	//  balance cs fee query_id in_msg_body op _58=1607220500
+        EQUAL	//  balance cs fee query_id in_msg_body _59
+        IFJMP:<{	//  balance cs fee query_id in_msg_body
+          s0 s3 XCHG	//  balance in_msg_body fee query_id cs
+          LDMSGADDR	//  balance in_msg_body fee query_id _87 _86
+          DROP	//  balance in_msg_body fee query_id sender_address
+          s1 s3 s3 XCHG3	//  balance sender_address query_id in_msg_body fee
+          transfer_ownership INLINECALLDICT
+          RETALT
+        }>	//  balance cs fee query_id in_msg_body
+        5 BLKDROP	// 
+      }>ELSE<{
+        6 BLKDROP	// 
+      }>
+    }>
+  }>
+  recv_external PROC:<{
+    //  my_balance msg_value in_msg_full in_msg_body
+    4 BLKDROP	// 
+  }>
+}END>c

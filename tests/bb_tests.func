@@ -1,0 +1,80 @@
+#pragma version >=0.2.0;
+
+#include "utils/constants.func";
+
+(cell) load_test_data() inline {
+	slice ds = get_data().begin_parse();
+	cell payouts = ds~load_dict();
+	return (payouts);
+}
+
+int __test_get_contract_balance() {
+    var (gas_used, stack) = invoke_method(balance, []);
+    throw_unless(35, stack.tuple_length() == 1);
+    return gas_used;
+}
+
+;; int __test_main() {  ;; sending custom (trash) message
+;;     int balance = one_ton * 10;
+;;     slice rand_addr = generate_internal_address_with_custom_data(0, 0, random());
+;;     slice rand_addr_to = generate_internal_address_with_custom_data(0, 0, random());
+;;     int query_id = rand(1337) + 1;
+;;     int nft_op = 1;
+;;     builder msg_body = generate_internal_message_body( nft_op, query_id ).store_slice(rand_addr_to);
+;; 	cell message = generate_internal_message_custom(0, 0, 0, msg_body, rand_addr, null(), 0);
+;; 	int gas_failed = invoke_method_expect_fail(recv_internal, [balance, 0, message, msg_body.end_cell().begin_parse()]);
+;; 	return gas_failed;
+;; }
+
+int __test_main_empty_msg() {  ;; sending msgs with empty body
+    int balance = one_ton * 10;
+    slice rand_addr = generate_internal_address_with_custom_data(0, 0, random());
+    slice rand_addr_to = generate_internal_address_with_custom_data(0, 0, random());
+    int query_id = rand(1337) + 1;
+    int nft_op = 1;
+    builder msg_body = generate_internal_message_body( nft_op, query_id ).store_slice(rand_addr_to);
+    cell message = generate_internal_message_custom(0, 0, 0, msg_body, rand_addr, null(), 0);
+	int gas_failed = invoke_method_expect_fail(recv_internal, [balance, 0, message, null()]);
+    return gas_failed;
+}
+
+;; int __test_nft_not_exists() {
+;;     int balance = one_ton * 10;
+;;     slice rand_addr = generate_internal_address_with_custom_data(0, 0, random());
+;;     slice rand_addr_to = generate_internal_address_with_custom_data(0, 0, random());
+;;     int query_id = rand(1337) + 1;
+;;     int nft_op = 1;
+;;     var nft = 0;
+;;     builder msg_body = generate_internal_message_body( nft_op, query_id ).store_uint(nft, 256);
+;; 	cell message = generate_internal_message_custom(0, 0, 0, msg_body, rand_addr, null(), 0);
+;; 	int gas_failed = invoke_method_expect_fail(recv_internal, [balance, 0, message, msg_body.end_cell().begin_parse()]);
+;; 	return gas_failed;
+;; }
+
+int __test_cur_state_is_1() {
+    int state = 1;
+    int query_id = rand(1337) + 1;
+    slice rand_addr_to = generate_internal_address_with_custom_data(0, 0, random());
+	var (gas, _) = invoke_method(send_money, [64, rand_addr_to, one_ton * 10, 12, 12345]);
+    throw_unless(124, state == 1);
+    return gas;
+}
+
+;; int __test_nft_is_coming_() {
+;;     var nft = 66666;
+;;     int state = 2;
+;;     slice nft_owner_addr = generate_internal_address_with_custom_data(0, 0, random());
+;;     int query_id = rand(1337) + 1;
+;;     var (gas, _) = invoke_method(send_nft, [64, 0, nft, nft_owner_addr, query_id]);
+;;     throw_unless(123, state == 2);
+;;     return gas;
+;; }
+
+int __test_not_enough_balance() {
+    int balance = 0;
+    int amount = one_ton * 10;
+    int addr = 23;
+    int fees = one_ton;
+    int gas_failed = invoke_method_expect_fail(send_money, [64, addr, amount, 1, 12345]);
+	return gas_failed;
+}

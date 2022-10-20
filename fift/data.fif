@@ -1,0 +1,9 @@
+"TonUtil.fif" include
+"Asm.fif" include
+
+"build/contract.pk" load-generate-keypair
+"../build/contract.fif"
+
+<b 
+    1 8 u, // set state
+b>

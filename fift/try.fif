@@ -1,0 +1,6 @@
+"Asm.fif" include
+
+<b
+  1 32 u,  
+  12345 64 u, 
+b>
