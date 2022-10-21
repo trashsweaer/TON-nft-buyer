@@ -200,7 +200,7 @@ PROGRAM{
     BALANCE	//  _0
     FIRST	//  _1
   }>
-  set_up_state PROCREF:<{
+  set_up_state PROCINLINE:<{
     //  state
     NEWC	//  state _1
     8 STU	//  _3
@@ -362,12 +362,12 @@ PROGRAM{
       1 EQINT	//  balance amount op query_id in_msg_body fee _34
       IFJMP:<{	//  balance amount op query_id in_msg_body fee
         SWAP	//  balance amount op query_id fee in_msg_body
-        LDDICT	//  balance amount op query_id fee _74 _73
+        LDDICT	//  balance amount op query_id fee _76 _75
         DROP	//  balance amount op query_id fee dict
         UNTIL:<{
           64 PUSHINT	//  balance amount op query_id fee dict _42=64
           DICTUREMMIN
-          NULLSWAPIFNOT2	//  balance amount op query_id fee _78 _80 _79 _81
+          NULLSWAPIFNOT2	//  balance amount op query_id fee _80 _82 _81 _83
           NIP	//  balance amount op query_id fee dict data f?
           DUP	//  balance amount op query_id fee dict data f? f?
           IF:<{	//  balance amount op query_id fee dict data f?
@@ -379,7 +379,7 @@ PROGRAM{
             64 PUSHINT	//  balance amount op query_id fee dict data f? _48=64
             s0 s2 XCHG	//  balance amount op query_id fee dict _48=64 f? data
             LDMSGADDR	//  balance amount op query_id fee dict _48=64 f? _49 data
-            LDVARUINT16	//  balance amount op query_id fee dict _48=64 f? _49 _85 _84
+            LDVARUINT16	//  balance amount op query_id fee dict _48=64 f? _49 _87 _86
             DROP	//  balance amount op query_id fee dict _48=64 f? _49 _51
             s7 s6 PUSH2
             s4 s5 XCHG	//  balance amount op query_id fee dict f? _48=64 _49 _51 op query_id
@@ -390,23 +390,27 @@ PROGRAM{
           NOT	//  balance amount op query_id fee dict _54
         }>	//  balance amount op query_id fee dict
         6 BLKDROP	// 
+        2 PUSHINT	//  cur_state=2
+        set_up_state INLINECALLDICT
         RETALT
       }>	//  balance amount op query_id in_msg_body fee
       6 BLKDROP	// 
     }>ELSE<{	//  balance cs op query_id cur_state fee amount in_msg_body
       NIP	//  balance cs op query_id cur_state fee in_msg_body
       s0 s2 XCHG	//  balance cs op query_id in_msg_body fee cur_state
-      2 EQINT	//  balance cs op query_id in_msg_body fee _57
+      2 EQINT	//  balance cs op query_id in_msg_body fee _58
       IF:<{	//  balance cs op query_id in_msg_body fee
         s0 s3 XCHG
-        1607220500 PUSHINT	//  balance cs fee query_id in_msg_body op _58=1607220500
-        EQUAL	//  balance cs fee query_id in_msg_body _59
+        1607220500 PUSHINT	//  balance cs fee query_id in_msg_body op _59=1607220500
+        EQUAL	//  balance cs fee query_id in_msg_body _60
         IFJMP:<{	//  balance cs fee query_id in_msg_body
           s0 s3 XCHG	//  balance in_msg_body fee query_id cs
-          LDMSGADDR	//  balance in_msg_body fee query_id _87 _86
+          LDMSGADDR	//  balance in_msg_body fee query_id _89 _88
           DROP	//  balance in_msg_body fee query_id sender_address
           s1 s3 s3 XCHG3	//  balance sender_address query_id in_msg_body fee
           transfer_ownership INLINECALLDICT
+          1 PUSHINT	//  cur_state=1
+          set_up_state INLINECALLDICT
           RETALT
         }>	//  balance cs fee query_id in_msg_body
         5 BLKDROP	// 
