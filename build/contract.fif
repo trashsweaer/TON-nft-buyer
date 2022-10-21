@@ -7,11 +7,10 @@ PROGRAM{
   DECLPROC exp
   DECLPROC log2
   DECLPROC force_chain
-  DECLPROC set_up_fees
-  DECLPROC load_all_fees
+  DECLPROC load_data
+  DECLPROC load_fees
+  DECLPROC save_data
   104128 DECLMETHOD balance
-  DECLPROC set_up_state
-  DECLPROC load_cur_state
   DECLPROC send_money
   DECLPROC send_msg
   DECLPROC transfer_ownership
@@ -181,38 +180,35 @@ PROGRAM{
     0 EQINT	//  _6
     333 THROWIFNOT
   }>
-  set_up_fees PROCREF:<{
-    //  fee
-    NEWC	//  fee _1
-    SWAP	//  _1 fee
-    STVARUINT16	//  _2
-    ENDC	//  _3
-  }>
-  load_all_fees PROCINLINE:<{
+  load_data PROC:<{
     // 
     c4 PUSH	//  _1
     CTOS	//  ds
-    LDVARUINT16	//  _6 _5
-    DROP	//  _3
+    8 LDU	//  _3 ds
+    LDREF	//  _3 _11 _10
+    DROP	//  _3 _6
+  }>
+  load_fees PROCINLINE:<{
+    //  fees_cell
+    CTOS	//  ds
+    LDVARUINT16	//  _3 ds
+    LDMSGADDR	//  _3 _5 ds
+    LDVARUINT16	//  _3 _5 _14 _13
+    DROP	//  _3 _5 _7
+  }>
+  save_data PROCINLINE:<{
+    //  state fees_cell
+    SWAP
+    NEWC	//  fees_cell state _2
+    8 STU	//  fees_cell _4
+    STREF	//  _5
+    ENDC	//  _6
+    c4 POP
   }>
   balance PROCREF:<{
     // 
     BALANCE	//  _0
     FIRST	//  _1
-  }>
-  set_up_state PROCINLINE:<{
-    //  state
-    NEWC	//  state _1
-    8 STU	//  _3
-    ENDC	//  _4
-    c4 POP
-  }>
-  load_cur_state PROCINLINE:<{
-    // 
-    c4 PUSH	//  _1
-    CTOS	//  ds
-    8 LDU	//  _7 _6
-    DROP	//  _3
   }>
   send_money PROCINLINE:<{
     //  mode to_addr amount op query_id
@@ -349,73 +345,80 @@ PROGRAM{
     SWAP	//  balance cs in_msg_body
     32 LDU	//  balance cs op in_msg_body
     64 LDU	//  balance cs op query_id in_msg_body
-    load_all_fees INLINECALLDICT	//  balance cs op query_id in_msg_body fee
-    load_cur_state INLINECALLDICT	//  balance cs op query_id in_msg_body fee cur_state
-    s0 s2 XCHG	//  balance cs op query_id cur_state fee in_msg_body
-    LDVARUINT16	//  balance cs op query_id cur_state fee amount in_msg_body
-    s3 PUSH	//  balance cs op query_id cur_state fee amount in_msg_body cur_state
-    1 EQINT	//  balance cs op query_id cur_state fee amount in_msg_body _32
-    IF:<{	//  balance cs op query_id cur_state fee amount in_msg_body
+    load_data CALLDICT	//  balance cs op query_id in_msg_body state fees_cell
+    s0 s2 XCHG	//  balance cs op query_id fees_cell state in_msg_body
+    LDVARUINT16	//  balance cs op query_id fees_cell state _82 _81
+    NIP	//  balance cs op query_id fees_cell state in_msg_body
+    s2 PUSH	//  balance cs op query_id fees_cell state in_msg_body fees_cell
+    load_fees INLINECALLDICT	//  balance cs op query_id fees_cell state in_msg_body _83 _84 _85
+    NIP	//  balance cs op query_id fees_cell state in_msg_body marketplace_fee royalty_amount
+    s3 PUSH	//  balance cs op query_id fees_cell state in_msg_body marketplace_fee royalty_amount state
+    1 EQINT	//  balance cs op query_id fees_cell state in_msg_body marketplace_fee royalty_amount _35
+    IF:<{	//  balance cs op query_id fees_cell state in_msg_body marketplace_fee royalty_amount
       s3 POP
-      s5 POP	//  balance amount op query_id in_msg_body fee
-      s3 PUSH	//  balance amount op query_id in_msg_body fee op
-      1 EQINT	//  balance amount op query_id in_msg_body fee _34
-      IFJMP:<{	//  balance amount op query_id in_msg_body fee
-        SWAP	//  balance amount op query_id fee in_msg_body
-        LDDICT	//  balance amount op query_id fee _76 _75
-        DROP	//  balance amount op query_id fee dict
+      s6 POP	//  balance marketplace_fee op query_id fees_cell royalty_amount in_msg_body
+      s4 PUSH	//  balance marketplace_fee op query_id fees_cell royalty_amount in_msg_body op
+      1 EQINT	//  balance marketplace_fee op query_id fees_cell royalty_amount in_msg_body _37
+      IFJMP:<{	//  balance marketplace_fee op query_id fees_cell royalty_amount in_msg_body
+        LDDICT	//  balance marketplace_fee op query_id fees_cell royalty_amount _87 _86
+        DROP	//  balance marketplace_fee op query_id fees_cell royalty_amount dict
         UNTIL:<{
-          64 PUSHINT	//  balance amount op query_id fee dict _42=64
+          64 PUSHINT	//  balance marketplace_fee op query_id fees_cell royalty_amount dict _45=64
           DICTUREMMIN
-          NULLSWAPIFNOT2	//  balance amount op query_id fee _80 _82 _81 _83
-          NIP	//  balance amount op query_id fee dict data f?
-          DUP	//  balance amount op query_id fee dict data f? f?
-          IF:<{	//  balance amount op query_id fee dict data f?
-            s6 s3 PUSH2	//  balance amount op query_id fee dict data f? amount fee
-            ADD	//  balance amount op query_id fee dict data f? _45
-            s8 s(-1) PUXC	//  balance amount op query_id fee dict data f? balance _45
-            GEQ	//  balance amount op query_id fee dict data f? _46
+          NULLSWAPIFNOT2	//  balance marketplace_fee op query_id fees_cell royalty_amount _91 _93 _92 _94
+          NIP	//  balance marketplace_fee op query_id fees_cell royalty_amount dict data f?
+          DUP	//  balance marketplace_fee op query_id fees_cell royalty_amount dict data f? f?
+          IF:<{	//  balance marketplace_fee op query_id fees_cell royalty_amount dict data f?
+            s7 s3 PUSH2	//  balance marketplace_fee op query_id fees_cell royalty_amount dict data f? marketplace_fee royalty_amount
+            ADD	//  balance marketplace_fee op query_id fees_cell royalty_amount dict data f? _48
+            s9 s(-1) PUXC	//  balance marketplace_fee op query_id fees_cell royalty_amount dict data f? balance _48
+            GEQ	//  balance marketplace_fee op query_id fees_cell royalty_amount dict data f? _49
             118 THROWIFNOT
-            64 PUSHINT	//  balance amount op query_id fee dict data f? _48=64
-            s0 s2 XCHG	//  balance amount op query_id fee dict _48=64 f? data
-            LDMSGADDR	//  balance amount op query_id fee dict _48=64 f? _49 data
-            LDVARUINT16	//  balance amount op query_id fee dict _48=64 f? _49 _87 _86
-            DROP	//  balance amount op query_id fee dict _48=64 f? _49 _51
-            s7 s6 PUSH2
-            s4 s5 XCHG	//  balance amount op query_id fee dict f? _48=64 _49 _51 op query_id
+            64 PUSHINT	//  balance marketplace_fee op query_id fees_cell royalty_amount dict data f? _51=64
+            s0 s2 XCHG	//  balance marketplace_fee op query_id fees_cell royalty_amount dict _51=64 f? data
+            LDMSGADDR	//  balance marketplace_fee op query_id fees_cell royalty_amount dict _51=64 f? _52 data
+            LDVARUINT16	//  balance marketplace_fee op query_id fees_cell royalty_amount dict _51=64 f? _52 _98 _97
+            DROP	//  balance marketplace_fee op query_id fees_cell royalty_amount dict _51=64 f? _52 _54
+            s8 s7 PUSH2
+            s4 s5 XCHG	//  balance marketplace_fee op query_id fees_cell royalty_amount dict f? _51=64 _52 _54 op query_id
             send_money INLINECALLDICT
           }>ELSE<{
-            NIP	//  balance amount op query_id fee dict f?
+            NIP	//  balance marketplace_fee op query_id fees_cell royalty_amount dict f?
           }>
-          NOT	//  balance amount op query_id fee dict _54
-        }>	//  balance amount op query_id fee dict
-        6 BLKDROP	// 
-        2 PUSHINT	//  cur_state=2
-        set_up_state INLINECALLDICT
+          NOT	//  balance marketplace_fee op query_id fees_cell royalty_amount dict _57
+        }>	//  balance marketplace_fee op query_id fees_cell royalty_amount dict
+        s2 s5 XCHG
+        5 BLKDROP
+        2 PUSHINT
+        s2 POP	//  new_state=2 fees_cell
+        save_data INLINECALLDICT
         RETALT
-      }>	//  balance amount op query_id in_msg_body fee
-      6 BLKDROP	// 
-    }>ELSE<{	//  balance cs op query_id cur_state fee amount in_msg_body
-      NIP	//  balance cs op query_id cur_state fee in_msg_body
-      s0 s2 XCHG	//  balance cs op query_id in_msg_body fee cur_state
-      2 EQINT	//  balance cs op query_id in_msg_body fee _58
-      IF:<{	//  balance cs op query_id in_msg_body fee
-        s0 s3 XCHG
-        1607220500 PUSHINT	//  balance cs fee query_id in_msg_body op _59=1607220500
-        EQUAL	//  balance cs fee query_id in_msg_body _60
-        IFJMP:<{	//  balance cs fee query_id in_msg_body
-          s0 s3 XCHG	//  balance in_msg_body fee query_id cs
-          LDMSGADDR	//  balance in_msg_body fee query_id _89 _88
-          DROP	//  balance in_msg_body fee query_id sender_address
-          s1 s3 s3 XCHG3	//  balance sender_address query_id in_msg_body fee
+      }>	//  balance marketplace_fee op query_id fees_cell royalty_amount in_msg_body
+      7 BLKDROP	// 
+    }>ELSE<{	//  balance cs op query_id fees_cell state in_msg_body marketplace_fee royalty_amount
+      s0 s3 XCHG	//  balance cs op query_id fees_cell royalty_amount in_msg_body marketplace_fee state
+      2 EQINT	//  balance cs op query_id fees_cell royalty_amount in_msg_body marketplace_fee _62
+      IF:<{	//  balance cs op query_id fees_cell royalty_amount in_msg_body marketplace_fee
+        s0 s5 XCHG
+        1607220500 PUSHINT	//  balance cs marketplace_fee query_id fees_cell royalty_amount in_msg_body op _63=1607220500
+        EQUAL	//  balance cs marketplace_fee query_id fees_cell royalty_amount in_msg_body _64
+        IFJMP:<{	//  balance cs marketplace_fee query_id fees_cell royalty_amount in_msg_body
+          s0 s5 XCHG	//  balance in_msg_body marketplace_fee query_id fees_cell royalty_amount cs
+          LDMSGADDR	//  balance in_msg_body marketplace_fee query_id fees_cell royalty_amount _100 _99
+          DROP	//  balance in_msg_body marketplace_fee query_id fees_cell royalty_amount sender_address
+          s4 s4 XCHG2	//  balance in_msg_body sender_address query_id fees_cell marketplace_fee royalty_amount
+          ADD	//  balance in_msg_body sender_address query_id fees_cell _68
+          s1 s5 XCHG
+          s1 s4 XCHG	//  fees_cell balance sender_address query_id in_msg_body _68
           transfer_ownership INLINECALLDICT
-          1 PUSHINT	//  cur_state=1
-          set_up_state INLINECALLDICT
+          1 PUSHINT	//  fees_cell new_state=1
+          SWAP	//  new_state=1 fees_cell
+          save_data INLINECALLDICT
           RETALT
-        }>	//  balance cs fee query_id in_msg_body
-        5 BLKDROP	// 
+        }>	//  balance cs marketplace_fee query_id fees_cell royalty_amount in_msg_body
+        7 BLKDROP	// 
       }>ELSE<{
-        6 BLKDROP	// 
+        8 BLKDROP	// 
       }>
     }>
   }>

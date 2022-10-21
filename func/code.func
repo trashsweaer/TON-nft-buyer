@@ -7,28 +7,33 @@ int min_gas_amount() asm "1000000000 PUSHINT";
 int ADDR_SIZE() asm "256 PUSHINT";
 const int min_tons_for_storage = 50000000;
 
-_ set_up_fees(int fee) inline_ref {
-    return begin_cell()
-        .store_coins(fee)
-        .end_cell();
+(int, cell) load_data() {
+  var ds = get_data().begin_parse();
+  return (
+      ds~load_uint(8),
+      ds~load_ref() 
+  );
 }
 
-(int) load_all_fees() inline {
-    var ds = get_data().begin_parse();
-    return ds~load_coins();
+(int, slice, int) load_fees(cell fees_cell) inline {
+  var ds = fees_cell.begin_parse();
+  return (
+      ds~load_coins(), ;; marketplace_fee,
+      ds~load_msg_addr(), ;; royalty_address 
+      ds~load_coins() ;; royalty_amount
+  );
+}
+
+() save_data(int state, cell fees_cell) impure inline {
+  set_data(begin_cell()
+    .store_uint(state, 8)
+    .store_ref(fees_cell)
+    .end_cell()
+  );
 }
 
 int balance() inline_ref method_id {
     return get_balance().pair_first();
-}
-
-() set_up_state(int state) impure inline {
-    set_data(begin_cell().store_uint(state, 8).end_cell());
-}
-
-(int) load_cur_state() inline { ;; 1 - not inited state; 2 - inited state
-    var ds = get_data().begin_parse();
-    return ds~load_uint(8);
 }
 
 () send_money(int mode, slice to_addr, int amount, int op, int query_id) impure inline {
@@ -106,35 +111,36 @@ int balance() inline_ref method_id {
     int op = in_msg_body~load_uint(32);
     int query_id = in_msg_body~load_uint(64);
 
-    int fee = load_all_fees();
+    var (state, fees_cell) = load_data();
 
-    int cur_state = load_cur_state();
     int amount = in_msg_body~load_coins();
+    
+    var (marketplace_fee, royalty_address, royalty_amount) = load_fees(fees_cell);
 
-    if(cur_state == 1) {
+    if(state == 1) {
         if(op == 1) {  ;; send money
             cell dict = in_msg_body~load_dict();
 
             do {
                 var (index, data, f?) = dict~udict::delete_get_min(64);   
             if(f?) {
-                throw_unless(118, balance >= amount + fee);
+                throw_unless(118, balance >= marketplace_fee + royalty_amount);
                 send_money(64, data~load_msg_addr(), data~load_coins(), op, query_id);
             }
             } until ( ~ f?);
 
-        cur_state = 2;
-        set_up_state(cur_state);
-        return ();
+            int new_state = 2;
+            save_data(new_state, fees_cell);
+            return ();
         }
     }   
 
-    elseif(cur_state == 2) {
+    elseif(state == 2) {
         if(op == op_transfer) {
             slice sender_address = cs~load_msg_addr();
-            transfer_ownership(balance, sender_address, query_id, in_msg_body, fee);
-            cur_state = 1;
-            set_up_state(cur_state);
+            transfer_ownership(balance, sender_address, query_id, in_msg_body, marketplace_fee + royalty_amount);
+            int new_state = 1;
+            save_data(new_state, fees_cell);
             return ();
             
         }
