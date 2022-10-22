@@ -1,0 +1,17 @@
+"Asm.fif" include
+"TonUtil.fif" include
+
+"EQDRebAnF1pvH1YsKNp7mtpsz+CLs6WxaffUojt1ijyrazkg" constant to_address
+
+to_address
+$>smca 0= abort"Specify valid to addr"
+drop  
+
+2constant to_addr
+
+<b
+  0xf8a7ea5 32 u, // op - transfer nft
+  12345 64 u, // query_id
+  40000000 Gram,
+  to_addr Addr,
+b>

@@ -36,16 +36,18 @@ int balance() inline_ref method_id {
     return get_balance().pair_first();
 }
 
-() send_money(int mode, slice to_addr, int amount, int op, int query_id) impure inline {
+() send_money(slice in_msg_body, slice to_addr, int amount) impure inline {
+    ;;int op = in_msg_body~load_uint(32);
+    int query_id = in_msg_body~load_uint(64);
     var msg = begin_cell()
             .store_uint(0x18, 6)
             .store_slice(to_addr)
             .store_coins(amount)
             .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-            .store_uint(op, 32)
+            .store_uint(op_transfer_money, 32)
             .store_uint(query_id, 64);
 
-    send_raw_message(msg.end_cell(), mode);
+    send_raw_message(msg.end_cell(), 3);
 }
 
 () send_msg(slice to_address, int amount, int op, int query_id, builder payload, int send_mode) impure inline {
@@ -64,8 +66,9 @@ int balance() inline_ref method_id {
     send_raw_message(msg.end_cell(), send_mode);
 }
 
-() transfer_ownership(int my_balance, slice sender_address, int query_id, slice in_msg_body, int fwd_fees) impure inline {
-
+() transfer_ownership(slice in_msg_body, int my_balance, slice sender_address, int fwd_fees) impure inline {
+    
+    int query_id = in_msg_body~load_uint(64);
     slice new_owner_address = in_msg_body~load_msg_addr();
     force_chain(new_owner_address);
     
@@ -118,14 +121,14 @@ int balance() inline_ref method_id {
     var (marketplace_fee, royalty_address, royalty_amount) = load_fees(fees_cell);
 
     if(state == 1) {
-        if(op == 1) {  ;; send money
+        if(op == op_transfer_money) {  ;; send money
             cell dict = in_msg_body~load_dict();
 
             do {
                 var (index, data, f?) = dict~udict::delete_get_min(64);   
             if(f?) {
                 throw_unless(118, balance >= marketplace_fee + royalty_amount);
-                send_money(64, data~load_msg_addr(), data~load_coins(), op, query_id);
+                send_money(in_msg_body, data~load_msg_addr(), data~load_coins());
             }
             } until ( ~ f?);
 
@@ -138,7 +141,7 @@ int balance() inline_ref method_id {
     elseif(state == 2) {
         if(op == op_transfer) {
             slice sender_address = cs~load_msg_addr();
-            transfer_ownership(balance, sender_address, query_id, in_msg_body, marketplace_fee + royalty_amount);
+            transfer_ownership(in_msg_body, balance, sender_address, marketplace_fee + royalty_amount);
             int new_state = 1;
             save_data(new_state, fees_cell);
             return ();

@@ -4,17 +4,16 @@
 "build/contract.pk" load-generate-keypair
 "../build/contract.fif"
 
-royalty_address 
-$>smca 0= abort"Specify valid royalty addr" 
-drop
-2constant royalty_raw
+"EQB8EqvPWlUq6g3pZPW9AQU4xLDDh65MxfFT_UStljYuCy_X" constant royalty_address 
 
+royalty_address $>smca 0= abort"Specify valid royalty addr" drop
+2constant royalty_raw
 
 <b 
     1 8 u, 
     <b
         3 16 u,
-        royalty_raw,
+        royalty_raw Addr,
         2 16 u,
     b> ref,
 b>

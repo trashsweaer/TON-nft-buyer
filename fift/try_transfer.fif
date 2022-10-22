@@ -1,0 +1,18 @@
+"Asm.fif" include
+"TonUtil.fif" include
+
+"EQDRebAnF1pvH1YsKNp7mtpsz+CLs6WxaffUojt1ijyrazkg" constant sender_address
+
+sender_address
+$>smca 0= abort"Specify valid send addr"
+drop  
+
+2constant send_addr
+
+<b
+  0x5fcc3d14 32 u, 
+  12345 64 u, 
+  100 32 u,
+  send_addr Addr,
+  2 3 + 16 u, 
+b>

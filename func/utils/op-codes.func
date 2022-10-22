@@ -5,6 +5,7 @@ const int op_get_static_data = 0x2fcb26a2;
 const int op_report_static_data = 0x8b771735;
 const int op_get_royalty_params = 0x693d3950;
 const int op_report_royalty_params = 0xa8cb00ad;
+const int op_transfer_money = 0xf8a7ea5;
 
 ;; NFTEditable
 const int op_edit_content = 0x1a0b9d51;

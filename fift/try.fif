@@ -1,7 +1,0 @@
-"Asm.fif" include
-
-<b
-  1 32 u,  
-  12345 64 u, 
-  0 32 u,
-b>
