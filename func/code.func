@@ -66,7 +66,7 @@ int balance() inline_ref method_id {
     send_raw_message(msg.end_cell(), send_mode);
 }
 
-() transfer_ownership(slice in_msg_body, int my_balance, slice sender_address, int fwd_fees) impure inline {
+() transfer_ownership(slice in_msg_body, int my_balance, slice sender_address, slice owner_address, int fwd_fees) impure inline {
     
     int query_id = in_msg_body~load_uint(64);
     slice new_owner_address = in_msg_body~load_msg_addr();
@@ -89,7 +89,7 @@ int balance() inline_ref method_id {
     throw_unless(402, rest_amount >= 0); 
 
     if (forward_amount) {
-      send_msg(new_owner_address, forward_amount, op_ownership_assigned, query_id, begin_cell().store_slice(in_msg_body), 1); 
+      send_msg(new_owner_address, forward_amount, op_ownership_assigned, query_id, begin_cell().store_slice(owner_address).store_slice(in_msg_body), 1); 
     }
     if (need_response) {
       force_chain(response_destination);
@@ -141,7 +141,8 @@ int balance() inline_ref method_id {
     elseif(state == 2) {
         if(op == op_transfer) {
             slice sender_address = cs~load_msg_addr();
-            transfer_ownership(in_msg_body, balance, sender_address, marketplace_fee + royalty_amount);
+            slice to_addr = in_msg_body~load_msg_addr(); ;; destination addr
+            transfer_ownership(in_msg_body, balance, sender_address, to_addr, marketplace_fee + royalty_amount);
             int new_state = 1;
             save_data(new_state, fees_cell);
             return ();

@@ -2,6 +2,7 @@
 "TonUtil.fif" include
 
 "EQDRebAnF1pvH1YsKNp7mtpsz+CLs6WxaffUojt1ijyrazkg" constant sender_address
+"EQDlT07NpSh0uj-aSBkF2TRxOqR2nw0ErOQsA6TYakr1-FxP" constant to_address
 
 sender_address
 $>smca 0= abort"Specify valid send addr"
@@ -9,10 +10,17 @@ drop
 
 2constant send_addr
 
+to_address
+$>smca 0= abort"Specify valid send addr"
+drop  
+
+2constant to_addr
+
 <b
   0x5fcc3d14 32 u, 
   12345 64 u, 
-  100 32 u,
+  100 32 u, 
   send_addr Addr,
-  2 3 + 16 u, 
+  to_addr Addr,
+  50000 Gram, 
 b>
