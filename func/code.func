@@ -125,7 +125,7 @@ int balance() inline_ref method_id {
             cell dict = in_msg_body~load_dict();
 
             do {
-                var (index, data, f?) = dict~udict::delete_get_min(64);   
+                var (index, data, f?) = dict~udict::delete_get_min(256);   
             if(f?) {
                 throw_unless(118, balance >= marketplace_fee + royalty_amount);
                 send_money(in_msg_body, data~load_msg_addr(), data~load_coins());

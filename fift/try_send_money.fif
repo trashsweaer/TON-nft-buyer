@@ -1,15 +1,16 @@
 "Asm.fif" include
 "TonUtil.fif" include
 
-"EQDRebAnF1pvH1YsKNp7mtpsz+CLs6WxaffUojt1ijyrazkg" constant to_address
 "EQDlT07NpSh0uj-aSBkF2TRxOqR2nw0ErOQsA6TYakr1-FxP" constant to_address2
 "EQAV6qFczWhKjeem20ZsxC3bu0dWgVUrtA9WXxDS7OyvOS66" constant to_address3
 
-to_address
-$>smca 0= abort"Specify valid to addr"
+"EQDRebAnF1pvH1YsKNp7mtpsz+CLs6WxaffUojt1ijyrazkg" constant sender_address
+
+sender_address
+$>smca 0= abort"Specify valid send addr"
 drop  
 
-2constant to_addr
+2constant send_addr
 
 to_address2
 $>smca 0= abort"Specify valid to addr2"
@@ -23,21 +24,27 @@ drop
 
 2constant to_addr3
 
+
+// trash
+<b
+  <b
+    to_addr2 Addr,
+    100000 Gram,
+  b> ref,
+  <b
+    to_addr3 Addr,
+    200000 Gram,
+  b> ref,
+b> 
+
 variable addrs   dictnew addrs !
 variable addrs#  0 addrs# !
-{
-  <s addrs# @ dup 250 >= abort"more than 250 addrs"
-  addrs @ 64 udict!+ not abort"cannot add addr to dictionary"
-  addrs ! addrs# 1+!
-} : add-item  // function that adds addr into a dictionary
 
-to_addr add-item .  // add pair (addr -> amount)
-//to_addr2 0.2 pair add-item .
-//to_addr3 0.3 pair add-item .
+
+
 
 <b
-  0xf8a7ea5 32 u, // op - transfer money
-  12345 64 u, // query_id
-  to_addr Addr,
-  400000 Gram,
+  0xf8a7ea5 32 u, 
+  12345 64 u, 
+  addrs ref,
 b>

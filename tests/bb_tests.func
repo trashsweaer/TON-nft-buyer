@@ -51,14 +51,14 @@ int __test_main_empty_msg() {  ;; sending msgs with empty body
 ;; 	return gas_failed;
 ;; }
 
-int __test_cur_state_is_1() {
-    int state = 1;
-    int query_id = rand(1337) + 1;
-    slice rand_addr_to = generate_internal_address_with_custom_data(0, 0, random());
-	var (gas, _) = invoke_method(send_money, [64, rand_addr_to, one_ton * 10, 12, 12345]);
-    throw_unless(124, state == 1);
-    return gas;
-}
+;; int __test_cur_state_is_1() {
+;;     int state = 1;
+;;     int query_id = rand(1337) + 1;
+;;     slice rand_addr_to = generate_internal_address_with_custom_data(0, 0, random());
+;; 	var (gas, _) = invoke_method(send_money, [64, rand_addr_to, one_ton * 10, 12, 12345]);
+;;     throw_unless(124, state == 1);
+;;     return gas;
+;; }
 
 ;; int __test_nft_is_coming_() {
 ;;     var nft = 66666;
@@ -77,4 +77,26 @@ int __test_not_enough_balance() {
     int fees = one_ton;
     int gas_failed = invoke_method_expect_fail(send_money, [64, addr, amount, 1, 12345]);
 	return gas_failed;
+}
+
+int __test_send_money() {
+    int balance = one_ton * 10;
+    cell dict = new_dict();
+    var op = op_transfer_money;
+    int query_id = rand(1337) + 1;
+    slice rand_addr_to = generate_internal_address_with_custom_data(0, 0, random());
+    slice rand_addr_to2 = generate_internal_address_with_custom_data(0, 0, random());
+
+    int key1 = 1;
+    int key2 = 2;
+	dict~udict_set(256, key1, rand_addr_to);
+	dict~udict_set(256, key2, rand_addr_to2);
+
+    slice rand_addr  = generate_internal_address_with_custom_data(0, 0, random());
+
+    builder msg_body = generate_internal_message_body( op, query_id ).store_coins(100).store_dict(dict);
+ 	cell message = generate_internal_message_custom(0, 0, 0, msg_body, rand_addr, null(), 0);
+
+    var (gas, _) = invoke_method(recv_internal, [balance, 0, message, msg_body.end_cell().begin_parse()]);
+    return gas;
 }

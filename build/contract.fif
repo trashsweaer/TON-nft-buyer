@@ -372,7 +372,7 @@ PROGRAM{
         LDDICT	//  balance marketplace_fee royalty_amount fees_cell dict in_msg_body
         UNTIL:<{
           SWAP
-          64 PUSHINT	//  balance marketplace_fee royalty_amount fees_cell in_msg_body dict _45=64
+          8 PUSHPOW2	//  balance marketplace_fee royalty_amount fees_cell in_msg_body dict _45=256
           DICTUREMMIN
           NULLSWAPIFNOT2	//  balance marketplace_fee royalty_amount fees_cell in_msg_body _93 _95 _94 _96
           NIP	//  balance marketplace_fee royalty_amount fees_cell in_msg_body dict data f?
