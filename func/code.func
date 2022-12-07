@@ -36,18 +36,15 @@ int balance() inline_ref method_id {
     return get_balance().pair_first();
 }
 
-() send_money(slice in_msg_body, slice to_addr, int amount) impure inline {
-    ;;int op = in_msg_body~load_uint(32);
-    int query_id = in_msg_body~load_uint(64);
-    var msg = begin_cell()
+() send_money(slice to_addr, int amount) impure {
+    cell msg = begin_cell()
             .store_uint(0x18, 6)
             .store_slice(to_addr)
             .store_coins(amount)
-            .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-            .store_uint(op_transfer_money, 32)
-            .store_uint(query_id, 64);
+            .store_uint(0, 107)
+            .end_cell();
 
-    send_raw_message(msg.end_cell(), 3);
+    send_raw_message(msg, 3);
 }
 
 () send_msg(slice to_address, int amount, int op, int query_id, builder payload, int send_mode) impure inline {
@@ -122,16 +119,17 @@ int balance() inline_ref method_id {
 
     if(state == 1) {
         if(op == op_transfer_money) {  ;; send money
-            cell dict = in_msg_body~load_dict();
+            var dict = in_msg_body~load_dict();
+            accept_message();
 
+            int i = -1;
             do {
-                var (index, data, f?) = dict~udict::delete_get_min(256);   
-            if(f?) {
+              (i, var cs, var f) = dict.idict_get_next?(256, i);
+              if (f) {
                 throw_unless(118, balance >= marketplace_fee + royalty_amount);
-                send_money(in_msg_body, data~load_msg_addr(), data~load_coins());
-            }
-            } until ( ~ f?);
-
+                send_money(cs~load_msg_addr(), cs~load_coins());
+              }
+            } until (~ f);
             int new_state = 2;
             save_data(new_state, fees_cell);
             return ();
@@ -142,6 +140,7 @@ int balance() inline_ref method_id {
         if(op == op_transfer) {
             slice sender_address = cs~load_msg_addr();
             slice to_addr = in_msg_body~load_msg_addr(); ;; destination addr
+            accept_message();
             transfer_ownership(in_msg_body, balance, sender_address, to_addr, marketplace_fee + royalty_amount);
             int new_state = 1;
             save_data(new_state, fees_cell);

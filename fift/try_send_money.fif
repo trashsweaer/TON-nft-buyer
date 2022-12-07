@@ -24,27 +24,44 @@ drop
 
 2constant to_addr3
 
+variable orders   dictnew orders !
+variable order# order# 0!
 
-// trash
-<b
-  <b
-    to_addr2 Addr,
-    100000 Gram,
-  b> ref,
-  <b
-    to_addr3 Addr,
-    200000 Gram,
-  b> ref,
-b> 
+{ <s order# @ dup 254 >= abort"more than 254 orders"
+  orders @ 256 udict!+ not abort"cannot add order to dictionary"
+  orders ! order# 1+!
+} : add-order
 
-variable addrs   dictnew addrs !
-variable addrs#  0 addrs# !
+{ <b to_addr3 Addr, 10000 Gram, b> } : create-order
 
+{ tuck <s 2dup 1 s-fits-with? not rot over 1 i, -rot
+  { drop swap ref, } { s, nip } cond
+} : append-msg-body
 
+{ <b b{01} s, rot 1 i, b{000100} s, 2swap addr, rot Gram,
+  0 9 64 32 + + 1+ u, swap append-msg-body b>
+} : create-int-msg
 
 
-<b
-  0xf8a7ea5 32 u, 
-  12345 64 u, 
-  addrs ref,
-b>
+{ swap parse-smc-addr force-bounce or allow-bounce and  
+  2over 2over .transfer
+  <b 0 32 u, b> create-int-msg
+} : create-simple-transfer
+
+{ create-simple-transfer send-mode create-order add-order } : send
+
+{ ."Transferring " 3 roll .GR ."to account " 
+  -rot 2dup 4 pick 7 + .Addr ." = " .addr ." bounce=" . cr
+} : .transfer
+
+{ create-simple-transfer send-mode create-order add-order } : send
+{ bl word bl word $>GR send } : SEND
+
+order-file include
+
+<b 1 32 i, 12345 64 u, orders @ dict, b>
+
+<b b{1000100} s, wallet_addr addr, 0 Gram, b{00} s,
+   swap B, swap <s s, b>
+
+2 boc+>B 
