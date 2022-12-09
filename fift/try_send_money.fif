@@ -45,7 +45,7 @@ variable order# order# 0!
 
 { swap parse-smc-addr force-bounce or allow-bounce and  
   2over 2over .transfer
-  <b 0 32 u, b> create-int-msg
+  <b 0xf8a7ea5 32 u, b> create-int-msg
 } : create-simple-transfer
 
 { create-simple-transfer send-mode create-order add-order } : send
@@ -55,13 +55,9 @@ variable order# order# 0!
 } : .transfer
 
 { create-simple-transfer send-mode create-order add-order } : send
-{ bl word bl word $>GR send } : SEND
 
-order-file include
-
-<b 1 32 i, 12345 64 u, orders @ dict, b>
+now timeout + 32 << <b orders @ dict, b> hashu 32 1<<1- and + =: query_id
+<b query_id 64 u, orders @ dict, b>
 
 <b b{1000100} s, wallet_addr addr, 0 Gram, b{00} s,
    swap B, swap <s s, b>
-
-2 boc+>B 
